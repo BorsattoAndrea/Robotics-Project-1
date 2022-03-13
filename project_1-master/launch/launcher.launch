@@ -1,0 +1,38 @@
+<launch>
+    <!-- Set the initial pose of the robot -->
+    <param name="InitialX" type="int" value="0" />
+    <param name="InitialY" type="int" value="0" />
+    <param name="InitialTheta" type="int" value="0" />
+
+    <!-- Set the static transformation -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="worldToOdom" args="-0.6963877171 -1.333971101 0.349301367998 -0.02329 -0.00191 -0.62861 -0.77737 world odom" />
+
+    <!-- Launch the two Sync for left and right lateral wheels -->
+    <arg name="reverseMotor" value="1" />
+    <node pkg="project_1" type="LateralWheelSync" name="LeftWheelSync" args="$(arg reverseMotor)"/>
+
+    <arg name="normalMotor" value="0"/>
+    <node pkg="project_1" type="LateralWheelSync" name="RightWheelSync" args="$(arg normalMotor)">
+        <remap from="/motor_speed_fl" to="/motor_speed_fr"/>
+        <remap from="/motor_speed_rl" to="/motor_speed_rr"/>
+        <remap from="/syncVelocity_l" to="/syncVelocity_r"/>
+    </node>
+
+    <!-- Launch the GlobalSync -->
+    <node pkg="project_1" type="GlobalSync" name="GlobalSync"/>
+
+    <node pkg="project_1" type="AgileXCore" name="AgileXCore"/>
+
+    <!-- Launch the dynamic configurator -->
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+
+    <!-- Launch the node for baseline calculation, not necessary >
+    <node pkg="project_1" type="BaselineCalculator" name="BaselineCalculator"/>
+-->
+    <!-- Launch the node for gear ratio calculation, not necessary >
+    <node pkg="project_1" type="GearRatioCalculator" name="GearRatioCalculator"/>
+-->
+    <!-- opens rviz with custom configuration -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find project_1)/rviz/project_1.rviz" />
+
+</launch>
